@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weather Detection App</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: url('kk.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #000;
+      margin: 0;
+      padding: 40px;
+    }
+    h1 {
+      color: white;
+      text-shadow: 2px 2px 5px black;
+    }
+    section.box {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 0 10px gray;
+      width: 90%;
+      max-width: 450px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 300px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+    #loader {
+      color: white;
+      font-weight: bold;
+      display: none;
+    }
+    #result {
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    #result.show {
+      opacity: 1;
+    }
+    section.states {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    section.states button {
+      background: #28a745;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    td {
+      padding: 8px;
+      border-bottom: 1px solid #ccc;
+      text-align: left;
+    }
+    section.features {
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 450px;
+      margin: auto;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌤️ Weather Detection App</h1>
+  <h2 style="color:white; text-shadow: 1px 1px 4px black;">Select a State</h2>
+
+  <!-- States Section -->
+  <section class="states">
+    <button onclick="setCity('Mumbai')">Maharashtra</button>
+    <button onclick="setCity('New Delhi')">Delhi</button>
+    <button onclick="setCity('Bengaluru')">Karnataka</button>
+    <button onclick="setCity('Chennai')">Tamil Nadu</button>
+    <button onclick="setCity('Lucknow')">Uttar Pradesh</button>
+    <button onclick="setCity('Jaipur')">Rajasthan</button>
+    <button onclick="setCity('Gandhinagar')">Gujarat</button>
+    <button onclick="setCity('Kolkata')">West Bengal</button>
+    <button onclick="setCity('Bhopal')">Madhya Pradesh</button>
+    <button onclick="setCity('Patna')">Bihar</button>
+    <button onclick="setCity('Chandigarh')">Punjab</button>
+    <button onclick="setCity('Dispur')">Assam</button>
+    <button onclick="setCity('Bhubaneswar')">Odisha</button>
+  </section>
+
+  <!-- App Features Section -->
+  <section class="features">
+    <h3 style="color: #fff;">App Features</h3>
+    <ul>
+      <li>Weather by city or state</li>
+      <li>Live temperature & humidity</li>
+      <li>Current wind speed</li>
+      <li>Displays local time</li>
+    </ul>
+  </section>
+
+  <!-- Weather Input & Result Section -->
+  <section class="box">
+    <form onsubmit="event.preventDefault(); getWeather();">
+      <input type="text" id="cityInput" placeholder="Enter city name">
+      <br>
+      <button type="submit">Submit</button>
+    </form>
+
+    <div id="loader">Loading...</div>
+    <div id="result"></div>
+  </section>
+
+  <script>
+    const apiKey = 'd209501b2e0bb49be03ac326a741f3fe';
+  
+    function setCity(city) {
+      document.getElementById('cityInput').value = city;
+      getWeather();
+    }
+  
+    async function getWeather() {
+      const city = document.getElementById('cityInput').value.trim();
+      if (!city) return;
+  
+      const loader = document.getElementById('loader');
+      const result = document.getElementById('result');
+      loader.style.display = 'block';
+      result.innerHTML = '';
+  
+      try {
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`);
+        const data = await res.json();
+        loader.style.display = 'none';
+        if (!res.ok) throw new Error(data.message);
+  
+        const localTime = new Date((data.dt + data.timezone) * 1000);
+        result.innerHTML = ` 
+          <h2>${data.name}, ${data.sys.country}</h2>
+          <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png">
+          <table>
+            <tr><td><b>Temperature</b></td><td>${data.main.temp} °C</td></tr>
+            <tr><td><b>Weather</b></td><td>${data.weather[0].description}</td></tr>
+            <tr><td><b>Humidity</b></td><td>${data.main.humidity} %</td></tr>
+            <tr><td><b>Wind</b></td><td>${data.wind.speed} m/s</td></tr>
+            <tr><td><b>Local Time</b></td><td>${localTime.toUTCString()}</td></tr>
+          </table>
+        `;
+        result.classList.add('show');
+      } catch (err) {
+        loader.style.display = 'none';
+        result.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+        result.classList.add('show');
+      }
+    }
+  </script>
+
+</body>
+</html>
